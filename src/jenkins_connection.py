@@ -15,6 +15,8 @@
 import os
 import sys
 import time
+from requests.exceptions import ConnectionError, HTTPError, MissingSchema
+from getpass import getpass
 from configparser import RawConfigParser
 from typing import TYPE_CHECKING
 
@@ -27,7 +29,7 @@ from src.jenkins_view import JenkinsView
 from src.utils import (ConfigError, MultiTasker, build_config_file,
                        build_jenkins_data_file, clear, decode, encode,
                        encode_password, get_build_options, jenkins_connections_dir,
-                       pick_value, save_argus_config, pause)
+                       pick_value, save_argus_config, get_input, pause)
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional
@@ -80,7 +82,18 @@ class JenkinsConnection:
         mock when we don't want to request a real URL.
         :exception ConnectionError: on inability to reach input url
         """
-        return Jenkins(url, username, password)
+        try:
+            return Jenkins(url, username, password)
+        except HTTPError as e:
+            if e.response.status_code == 401:
+                print('401 error for {}. (ctrl+c to hard-quit)'.format(self.name))
+                username = get_input('Re-enter username:', False)
+                password = getpass('Re-enter password:')
+                self._auth['username'] = username
+                self._auth['password'] = password
+                self.create_jenkins_obj(url, username=username, password=password)
+            else:
+                raise e
 
     @property
     def job_names(self):
