@@ -15,21 +15,21 @@
 import os
 import sys
 import time
-from requests.exceptions import ConnectionError, HTTPError, MissingSchema
-from getpass import getpass
 from configparser import RawConfigParser
+from getpass import getpass
 from typing import TYPE_CHECKING
 
 from jenkinsapi.custom_exceptions import UnknownJob
 from jenkinsapi.jenkins import Jenkins
-
+from requests.exceptions import HTTPError
 from src.jenkins_interface import download_builds
 from src.jenkins_job import JenkinsJob
 from src.jenkins_view import JenkinsView
 from src.utils import (ConfigError, MultiTasker, build_config_file,
                        build_jenkins_data_file, clear, decode, encode,
-                       encode_password, get_build_options, jenkins_connections_dir,
-                       pick_value, save_argus_config, get_input, pause)
+                       encode_password, get_build_options, get_input,
+                       jenkins_connections_dir, pause, pick_value,
+                       save_argus_config)
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional
